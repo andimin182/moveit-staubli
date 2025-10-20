@@ -1,0 +1,38 @@
+version: "3.9"
+services:
+  ros-humble-staubli-1:
+    build:
+      context: .
+      dockerfile: Dockerfile-Humble
+    command: /bin/bash
+    environment:
+      - DISPLAY=$DISPLAY
+      - QT_X11_NO_MITSHM=1
+    image: ros2-humble-staubli-image:1.0
+    container_name: ros2-humble-staubli-container
+    restart: unless-stopped
+    volumes:
+      - ws-volume:/root/ros_ws
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    ports:
+      - "11311:11311"
+    tty: true
+    stdin_open: true
+    
+networks:
+  ros_tuto_macvlan:
+    driver: bridge
+    driver_opts:
+      parent: enp0s1
+    ipam:
+      config:
+        - subnet: 192.168.1.0/24
+          gateway: 192.168.1.1
+
+volumes:
+  ws-volume:
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/andi/DockerDev/staubli/ros_ws
+      o: bind

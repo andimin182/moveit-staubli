@@ -1,0 +1,269 @@
+<?xml version="1.0"?>
+
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="RobotTX40System">
+    <xacro:include filename="$(find tx40_simulation)/urdf/tx40_gazebo.xacro" />
+    <xacro:include filename="$(find tx40_simulation)/urdf/tx40_ros2_control.xacro" />
+  
+    <xacro:property name="d1" value="0.320" />
+    <xacro:property name="a3" value="0.225" />
+    <xacro:property name="d3" value="-0.035" />
+    <xacro:property name="d4" value="0.225" />
+    <xacro:property name="a6" value="0.055" />
+    <xacro:property name="scalingX" value="1" />
+    <xacro:property name="scalingY" value="1" />
+    <xacro:property name="scalingZ" value="1" />
+    <xacro:property name="PI" value="3.14" />
+    <xacro:property name="limitJ2" value="3.14/2" />
+    <xacro:property name="limitJ3" value="3.14/2" />
+    <xacro:property name="limitJ5" value="3.14/2" />
+
+    <xacro:property name="use_collision" value="true"/>
+    <xacro:property name="use_cilinders" value="false"/>
+
+    <xacro:macro name="material" params="color">
+      <material name="blue">
+        <color rgba="0 0 1 1"/>
+      </material>
+    </xacro:macro>
+
+    <xacro:macro name="default_inertial" params="mass">
+      <inertial>
+        <mass value="${mass}"/>
+        <inertia ixx="1"  ixy="0"  ixz="0" iyy="1" iyz="0" izz="1" />
+      </inertial>
+    </xacro:macro>
+
+  <link name="world"/>
+
+  <link name="base_link">
+    <!-- Link base -->
+    <xacro:default_inertial mass="1" />
+    <visual>
+      <origin rpy="0 0 0" xyz="0.03 0.00005 0"/>
+      <geometry>
+        <xacro:if value="${use_cilinders}">
+          <box size="0.1 0.1 0.3"/>
+        </xacro:if>
+        <xacro:unless value="${use_cilinders}">
+          <mesh filename='package://tx40_simulation/meshes/base.stl' scale="${scalingX} ${scalingY} ${scalingZ}"/>
+        </xacro:unless>
+        </geometry>
+      <xacro:material color="blue" />
+    </visual>
+    <!-- The same mesh as for visualization is used -->
+    <xacro:if value="${use_collision}">
+      <collision>
+        <origin rpy="0 0 0" xyz="0 0 0.085"/>
+        <geometry>
+          <cylinder radius="0.07" length="0.17"/>
+        </geometry>
+      </collision>
+    </xacro:if>
+  </link>
+
+  <joint name="virtual_joint" type="fixed">
+    <parent link="world"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 0 0"/>
+  </joint>
+
+   <link name="link_1">
+    <!-- Link 1 -->
+    <xacro:default_inertial mass="0.1" />
+    <visual>
+      <origin rpy="0 0 0" xyz="0.03 0.001 -0.320"/>
+      <geometry>
+        <xacro:if value="${use_cilinders}">
+          <box size="0.01 0.01 0.03"/>
+        </xacro:if>
+        <xacro:unless value="${use_cilinders}">
+          <mesh filename='package://tx40_simulation/meshes/link1.stl' scale="${scalingX} ${scalingY} ${scalingZ}"/>
+        </xacro:unless>
+      </geometry>
+      <xacro:material color="blue" />
+    </visual>
+    <xacro:if value="${use_collision}">
+      <collision>
+        <origin rpy="0 0 0" xyz="0 0 -0.025"/>
+        <geometry>
+          <cylinder radius="0.07" length="0.15"/>
+        </geometry>
+      </collision>
+    </xacro:if>
+  </link>
+
+  <joint name="joint_1" type="revolute">
+    <origin rpy="0 0 0" xyz="0 0 ${d1}"/>
+    <parent link="base_link"/>
+    <child link="link_1"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="100" velocity="1.0" lower="-3.14" upper="3.14"/>
+  </joint>
+
+  <link name="link_2">
+  <xacro:default_inertial mass="0.1" />
+    <!-- Link 2 -->
+    <visual>
+      <origin rpy="0 0 0" xyz="0.03 0.001 -0.320"/>
+      <geometry>
+        <xacro:if value="${use_cilinders}">
+          <box size="0.01 0.01 0.03"/>
+        </xacro:if>
+        <xacro:unless value="${use_cilinders}">
+          <mesh filename='package://tx40_simulation/meshes/link2.stl' scale="${scalingX} ${scalingY} ${scalingZ}"/>
+        </xacro:unless>
+      </geometry>
+      <xacro:material color="blue" />
+    </visual>
+    <xacro:if value="${use_collision}">
+      <collision>
+        <origin rpy="0 0 0" xyz="-0.15 0 0.1"/>
+        <geometry>
+          <box size="0.1 0.06 0.2"/>
+        </geometry>
+      </collision>
+    </xacro:if>
+  </link>
+
+  <joint name="joint_2" type="revolute">
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="link_1"/>
+    <child link="link_2"/>
+    <axis xyz="-1 0 0"/>
+    <limit effort="100" velocity="1.0" lower="-1.57" upper="1.57"/>
+  </joint>
+
+  <link name="link_3">
+  <xacro:default_inertial mass="0.1" />
+    <!-- Link 3 -->
+    <visual>
+      <origin rpy="0 0 0" xyz="0.06 0 -0.55"/>
+      <geometry>
+        <xacro:if value="${use_cilinders}">
+          <box size="0.01 0.01 0.03"/>
+        </xacro:if>
+        <xacro:unless value="${use_cilinders}">
+          <mesh filename='package://tx40_simulation/meshes/link3.stl' scale="${scalingX} ${scalingY} ${scalingZ}"/>
+        </xacro:unless>
+      </geometry>
+      <xacro:material color="blue" />
+    </visual>
+    <xacro:if value="${use_collision}">
+      <collision>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <cylinder radius="0.06" length="0.08"/>
+        </geometry>
+      </collision>
+    </xacro:if>
+  </link>
+
+  <joint name="joint_3" type="revolute">
+    <origin rpy="0 0 0" xyz="${d3} 0 ${a3}"/>
+    <parent link="link_2"/>
+    <child link="link_3"/>
+    <axis xyz="-1 0 0"/>
+    <limit effort="100" velocity="1.0" lower="-1.57" upper="1.57"/>
+  </joint>
+
+  <link name="link_4">
+    <!-- Link 4 -->
+    <xacro:default_inertial mass="0.1" />
+    <visual>
+      <origin rpy="0 0 0" xyz="0.058 -0.03 -0.780"/>
+      <geometry>
+        <xacro:if value="${use_cilinders}">
+          <box size="0.01 0.01 0.03"/>
+        </xacro:if>
+        <xacro:unless value="${use_cilinders}">
+          <mesh filename='package://tx40_simulation/meshes/link4.stl' scale="${scalingX} ${scalingY} ${scalingZ}"/>
+        </xacro:unless>
+      </geometry>
+      <xacro:material color="blue" />
+    </visual>
+    <xacro:if value="${use_collision}">
+      <collision>
+        <origin rpy="0 0 0" xyz="0 0 -0.07"/>
+        <geometry>
+          <cylinder radius="0.06" length="0.09"/>
+        </geometry>
+      </collision>
+    </xacro:if>
+  </link>
+
+  <joint name="joint_4" type="revolute">
+    <origin rpy="0 0 0" xyz="0 0.03 ${d4}"/>
+    <parent link="link_3"/>
+    <child link="link_4"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="100" velocity="1.0" lower="-3.14" upper="3.14"/>
+  </joint>
+
+  <link name="link_5">
+    <!-- Link 5 -->
+    <xacro:default_inertial mass="0.1" />
+    <visual>
+      <origin rpy="0 0 0" xyz="0.058 -0.03 -0.78"/>
+      <geometry>
+        <xacro:if value="${use_cilinders}">
+          <box size="0.01 0.01 0.03"/>
+        </xacro:if>
+        <xacro:unless value="${use_cilinders}">
+          <mesh filename='package://tx40_simulation/meshes/link5.stl' scale="${scalingX} ${scalingY} ${scalingZ}"/>
+        </xacro:unless>
+      </geometry>
+      <xacro:material color="blue" />
+    </visual>
+    <xacro:if value="${use_collision}">
+      <collision>
+        <origin rpy="0 0 0" xyz="0 0 0.023"/>
+        <geometry>
+          <cylinder radius="0.02" length="0.025"/>
+        </geometry>
+      </collision>
+    </xacro:if>
+  </link>
+
+  <joint name="joint_5" type="revolute">
+    <origin rpy="0 0 0" xyz="0 0.0 0"/>
+    <parent link="link_4"/>
+    <child link="link_5"/>
+    <axis xyz="-1 0 0"/>
+    <limit effort="100" velocity="1.0" lower="-1.57" upper="1.57"/>
+  </joint>
+
+  <link name="ee">
+    <!-- EE -->
+    <xacro:default_inertial mass="0.1" />
+    <visual>
+      <origin rpy="0 0 0" xyz="0.058 -0.03 -0.835"/>
+      <geometry>
+        <xacro:if value="${use_cilinders}">
+          <box size="0.01 0.01 0.03"/>
+        </xacro:if>
+        <xacro:unless value="${use_cilinders}">
+          <mesh filename='package://tx40_simulation/meshes/ee.stl' scale="${scalingX} ${scalingY} ${scalingZ}"/>
+        </xacro:unless>
+      </geometry>
+      <xacro:material color="blue" />
+    </visual>
+    <xacro:if value="${use_collision}">
+      <collision>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <cylinder radius="0.02" length="0.02"/>
+        </geometry>
+      </collision>
+    </xacro:if>
+  </link>
+
+  <joint name="joint_6" type="revolute">
+    <origin rpy="0 0 0" xyz="0 0.0 ${a6}"/>
+    <parent link="link_5"/>
+    <child link="ee"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="100" velocity="1.0" lower="-3.14" upper="3.14"/>
+  </joint>
+
+</robot>
